@@ -1,0 +1,336 @@
+<script type = "text/javascript" src = "https://d3js.org/d3.v5.min.js"></script>
+<link rel="stylesheet" href="styleSheet.css">
+<h3 class="header">
+    <p class="title">Electoral Particitipation by Demographic</p>
+    <a class="tab" href="dataVis.html">The Info</a>
+    <a class="tab" href="callToAction.html">Call to Action</a>
+    <a class="tab" href="sources.html">Sources</a>
+</h3>
+<h4 id="chartTitle"></h4>
+<svg>
+    
+</svg>
+
+    <div class="hidden" id="tooltip">
+        <div id="state">
+        </div>
+        <div id ="percentage"></div>
+        <svg id="pie-graph"></svg>
+    </div>
+
+<table id="buttons">
+    <tr><th>Select a Demographic:</th></tr>
+    
+    <tr><td id="button" value='total'>Total</td><td></td>
+    <td id="button" value='youngest'>18 to 24</td></tr>
+    
+    <tr><td id="button" value='young'>25 to 34</td><td></td>
+    <td id="button" value='middle'>35 to 44</td></tr>
+    
+    <tr><td id="button" value='older'>45 to 64</td><td></td>
+    <td id="button" value='oldest'>65+</td></tr>
+    
+    <tr><td id="button" value='male'>Male</td><td>
+        </td><td id="button" value='female'>Female</td></tr>
+    
+    <tr><td id="button" value='white'>White(Only)</td><td>
+        </td><td id="button" value='hispanicNotWhite'>Hispanic(Excluding White Hispanics)</td></tr>
+    
+    <tr><td id="button" value='black'>Black(Only)</td><td>
+        </td><td id="button" value='asian'>Asian(Only)</td></tr>
+    
+    <tr><td id="button" value='hispanic'>Hispanic(All)</td><td>
+        </td><td id="button" value='whiteMix'>White(Including Mixed)</td></tr>
+    
+    <tr><td id="button" value='blackMix'>Black(Including Mixed)</td><td>
+        </td><td id="button" value='asianMix'>Asian(Including Mixed)</td></tr>
+</table>
+
+<script>
+    var initGraph = function(stateData,mapData,demo)
+    {
+        var screen = {width:900,height:550}
+        var margins = {left:30,right:20,top:20,bottom:30}
+        var graph =
+        {
+            width:screen.width-margins.left - margins.right,
+            height:screen.height - margins.top-margins.bottom
+        }
+        
+        d3.select("svg")
+        .attr("width",screen.width)
+        .attr("height",screen.height)
+        
+        var target = d3.select("svg")
+        .append("g")
+        .attr("id","#graph")
+        .attr("transform","translate("+margins.left+","+margins.top+")");
+        
+        joinData(mapData, stateData);
+        var projection = d3.geoAlbersUsa();
+        var pathGen = d3.geoPath().projection(projection);
+        var colors = {};
+        drawMap(mapData,target,pathGen,projection,demo);
+    }
+    var drawMap = function(mapData,target,pathGen,projection,demo)
+    {
+        target.selectAll("path")
+            .data(mapData.features)
+            .enter()
+            .append("path")
+            .attr("d",pathGen)
+            .style("fill", function(d){
+            return getColor(d,demo)
+            })
+            .on("mouseenter" ,function(state)
+            {
+                console.log("entered");
+                var xPos = d3.event.pageX;
+                var yPos = d3.event.pageY;
+                var data = state.properties.data[demo];    
+            
+            
+                    d3.select("#tooltip")
+                    .classed("hidden",false)
+                    .style("top",yPos+"px")
+                    .style("left",xPos+"px")
+        
+                    d3.select("#state")
+                    .text(state.properties.NAME);
+                    
+                    if (data =="B")
+                        {
+                            d3.select("#percentage")
+                            .text("Data Unavailable")
+                        }
+                    else
+                    {d3.select("#percentage")
+                    .text(state.properties.data[demo] + "% Voted")}
+                    
+                    //pie chart stuff from https://www.tutorialsteacher.com/d3js/create-pie-chart-using-d3js
+                    
+   /*                 var data = [state.properties.data[demo],100-state.properties.data[demo]]
+                    var pie = d3.pie();
+                    var color = d3.scaleOrdinal(['#399200','#ff0000']);
+                    
+                    var g = d3.select("#pie-graph")
+                    .attr("transform", "translate(50,50)");
+            
+                    var arc = d3.arc()
+                    .innerRadius(0)
+                    .outerRadius(50);
+                    
+
+                    
+                    var arcs = g.selectAll("arc")
+                    .data(pie(data))
+                    .enter()
+                    .append("g")
+                    .attr("class","arc");
+            
+                    arcs.append("path")
+                    .attr("fill",function(d,i)
+                         {
+                        return color(i);
+                    })
+                    .attr("d",arc);*/
+        
+            })//tool tip off
+            .on("mouseleave",function()
+            {
+                d3.select("#tooltip")    
+                .classed("hidden",true);
+            });
+        
+            d3.select("#chartTitle")
+            .text(getText(demo));
+        var colors = ['#4e9d17','#62a525','#74ab2e','#86af35','#97b13a','#a7b13d','#b7af3e','#c5aa3e','#d2a33b','#dd9936','#e88c30','#f07b28','#f7661d','#fc4810','#ff0000'];
+        
+        d3.select('svg')
+            .append('text')
+            .attr('x',593)
+            .attr('y',531)
+            .classed('legend',true)
+            .text("70%")
+        
+        d3.select('svg')
+            .append('text')
+            .attr('x',703)
+            .attr('y',531)
+            .classed('legend',true)
+            .text("40%")
+        
+        var xPos = 625;
+        var yPos = 518;
+        for(var x = 0;x<colors.length;x++)
+            {
+                d3.select('svg').append('rect')
+                    .attr('x',xPos)
+                    .attr('y',yPos)
+                    .attr('width',"5")
+                    .attr('height',"15")
+                    .attr('stroke',colors[x])
+                    .attr('fill',colors[x])
+                    .attr('stroke-width','1');
+                
+                xPos+=5;
+            }
+        
+        d3.select('svg').append('rect')
+            .attr('x',625)
+            .attr('y',495)
+            .attr('width',"10")                    
+            .attr('height',"15")
+            .attr('stroke','black')
+            .attr('fill','black')
+            .attr('stroke-width','1');
+        
+        d3.select('svg')
+            .append('text')
+            .attr('x',642)
+            .attr('y',507)
+            .classed('legend',true)
+            .text("Data Unavailable")
+            
+    }
+    var joinData = function(mapData, stateData)
+    {
+        var shapes = {};
+        
+        mapData.features.forEach(function(feature)
+        {
+            shapes[feature.properties.NAME] = feature;
+        })
+        
+        stateData.forEach(function(state)
+        {
+            if(shapes[state.states])
+            {shapes[state.states].properties.data=state;}
+        })
+        console.log(mapData);
+    }
+    var success = function(values)
+    {
+        console.log(values);
+        initGraph(values[0],values[1],"total");
+        d3.selectAll("#button").on("click",function(button)
+        {
+            console.log(this);
+            var demo = d3.select(this).attr('value');
+            d3.selectAll("svg g")
+                .remove();
+            
+            console.log(demo);
+            
+            initGraph(values[0],values[1],demo);
+        })
+    }
+    var failure = function()
+    {
+        console.log("It messed up!")
+    }
+    var getColor = function(state, demo)
+    {   
+        if(!state.properties.data)
+            {
+                return "no data";
+            }
+        var d = state.properties.data;
+        d = d[demo];
+        if (d == 'B')
+        {
+            return 'black';
+        }
+        else
+            
+        {return d>70 ? '#399200':
+                d > 68  ? '#4e9d17' :
+                d > 66  ? '#62a525' :
+                d > 64  ? '#74ab2e' :
+                d > 62  ? '#86af35' :
+                d > 60  ? '#97b13a' :
+                d > 58  ? '#a7b13d' :
+                d > 56  ? '#b7af3e' :
+                d > 54  ? '#c5aa3e' :
+                d > 52  ? '#d2a33b' :
+                d > 50  ? '#dd9936' :
+                d > 48  ? '#e88c30' :
+                d > 46  ? '#f07b28' :
+                d > 44  ? '#f7661d' :
+                d > 42  ? '#fc4810' :
+                    '#ff0000';}
+    }
+    var getText = function(demo)
+    {
+        if (demo == 'total')
+            {
+                return "Total Degree of Electoral Participation for All Citizens";
+            }
+        else if (demo == 'youngest')
+            {
+                return "Degree of Electoral Participation of Citizens Aged 18 to 24";
+            }
+        else if (demo == 'young')
+            {
+                return "Degree of Electoral Participation of Citizens Aged 25 to 34";
+            }
+        else if (demo == 'middle')
+            {
+                return "Degree of Electoral Participation of Citizens Aged 35 to 44";
+            }
+        else if (demo == 'older')
+            {
+                return "Degree of Electoral Participation of Citizens Aged 45 to 64";
+            }
+        else if (demo == 'oldest')
+            {
+                return "Degree of Electoral Participation of Citizens 65 or Older";
+            }
+        else if (demo == 'male')
+            {
+                return "Degree of Electoral Participation for Citizens Identifying as Male";
+            }
+        else if (demo == 'female')
+            {
+                return "Degree of Electoral Participation for Citizens Identifying as Female";
+            }
+        else if (demo == 'white')
+            {
+                return "Degree of Electoral Participation for Citizens Identifying as White";
+            }
+        else if (demo == 'hispanicNotWhite')
+            {
+                return "Degree of Electoral Participation for Citizens Identifying as Hispanic but not White";
+            }
+        else if (demo == 'black')
+            {
+                return "Degree of Electoral Participation for Citizens Identifying as Black Only";
+            }
+        else if (demo == 'asian')
+            {
+                return "Degree of Electoral Participation for Citizens Identifying as Asian Only";
+            }
+        else if (demo == 'hispanic')
+            {
+                return "Degree of Electoral Participation for Citizens Identifying as Hispanic";
+            }
+        else if (demo == 'whiteMix')
+            {
+                return "Degree of Electoral Participation for Citizens Identifying as White or as a Mixture of Races Including White";
+            }
+        else if (demo == 'blackMix')
+            {
+                return "Degree of Electoral Participation for Citizens Identifying as Black or as a Mixture of Races Including Black";
+            }
+        else if (demo == 'asianMix')
+            {
+                return "Degree of Electoral Participation for Citizens Identifying as Asian or as a Mixture of Races Including Asian";
+            }
+    }
+    var statePromise = d3.csv("data/stateData.csv");
+    var geoPromise = d3.json("data/mapData.json");
+    var promises = [statePromise,geoPromise];
+    Promise.all(promises).then(success,failure);
+    
+
+</script>

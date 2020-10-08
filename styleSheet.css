@@ -1,0 +1,81 @@
+#desc{
+    width:900;
+}
+.header{
+    text-align: left;
+    background: purple;
+    height:100px;
+    padding-top: 0px;
+    padding-left: 25px;
+    box-shadow: 2px;
+    padding-right: 0px;
+    margin-bottom: 25;
+}
+.tab{
+    font: bold serif;
+    text-decoration: none;
+    background-color: #EEEEEE;
+    color: #333333;
+    padding: 2px 6px 2px 6px;
+    border-top: 1px solid #CCCCCC;
+    border-right: 1px solid #333333;
+    border-bottom: 1px solid #333333;
+    border-left: 1px solid #CCCCCC;
+    width: 100px;
+    height: 60px;
+    text-align: center;
+    font-size: 30;
+}
+.title{
+    font: bold serif;
+    color:darkturquoise;
+    font-size: 25;
+    padding-top: 5;
+}
+.introduction{
+    font-size:20;
+}
+#tooltip.hidden
+{
+    display:none;
+}
+
+#tooltip
+{
+    position:absolute;
+    width:135px;
+    height:55px;
+    padding:10px;
+    background-color:white;
+    border-radius:10px;
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
+    pointer-events:none;
+}
+
+#chartTitle
+{
+    font-size:20;
+}
+
+#state
+{
+    font-size:20px;
+}
+
+#buttons{
+    float:right;
+    margin-top:60;
+    margin-right:150;
+}
+#button{
+    padding: 8px 8px 8px 8px;
+    background-color:lightblue;
+    width:100;
+    font:bold;
+    text-decoration: none;
+}
+#callButtons{
+    float:right;
+    margin-top:60;
+    margin-right:150;
+}
